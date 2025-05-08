@@ -1,0 +1,34 @@
+# Node modules
+node_modules/
+npm-debug.log*
+
+# Build e preview
+dist/
+.vite/
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ambiente (nunca subir chaves ou configs privadas)
+.env
+.env.local
+.env.production
+firebase-config.js
+
+# IDEs (Visual Studio Code, PyCharm, etc)
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Coverage de testes (se for usar Jest ou similar no futuro)
+coverage/
+
+# Arquivos de SO Linux/Unix/macOS
+*.swp
