@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import { useLista } from '../context/ListaContext';
+import SelecionarMercado from '../components/SelecionarMercado';
+import ItemCompra from '../components/ItemCompra';
+import TecladoNumerico from '../components/TecladoNumerico';
 
 export default function Home() {
   const { itens, toggleItem, adicionarItem, excluirItem, editarItem } = useLista();
   const [novoProduto, setNovoProduto] = useState('');
   const [novaMarca, setNovaMarca] = useState('');
   const [novaQuantidade, setNovaQuantidade] = useState(1);
+  const [itemSelecionado, setItemSelecionado] = useState(null);
+  const [mercadoAtual, setMercadoAtual] = useState('');
+  const [mostrarTeclado, setMostrarTeclado] = useState(false);
 
   const handleAdd = () => {
     if (novoProduto.trim()) {
@@ -19,10 +25,8 @@ export default function Home() {
   const handleEditar = (item) => {
     const novoNome = prompt('Novo nome do produto:', item.nome);
     if (!novoNome) return;
-
     const novaMarca = prompt('Nova marca:', item.marca);
     if (novaMarca === null) return;
-
     const novaQtd = prompt('Nova quantidade:', item.quantidade);
     const qtdConvertida = parseInt(novaQtd);
 
@@ -45,8 +49,10 @@ export default function Home() {
   return (
     <div className="max-w-2xl mx-auto bg-white shadow-xl rounded-xl p-6">
       <h1 className="text-3xl font-extrabold text-green-700 mb-6 text-center">
-        🛒 Compra Certa
+        🛒 Minha Lista
       </h1>
+
+      <SelecionarMercado mercadoAtual={mercadoAtual} setMercadoAtual={setMercadoAtual} />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <input
@@ -79,60 +85,16 @@ export default function Home() {
 
       <ul className="space-y-3">
         {itensPendentes.map((item) => (
-          <li
+          <ItemCompra
             key={item.id}
-            className="flex justify-between items-center p-4 rounded-lg shadow-md transition-all duration-300 bg-gray-50"
-          >
-            <div className="w-full">
-              <div className="flex justify-between items-start">
-                <div>
-                  <strong className="text-lg">{item.nome}</strong>{' '}
-                  <span className="text-sm text-gray-500">({item.marca})</span>
-                  {item.preco > 0 && (
-                    <span className="block text-green-700 font-semibold mt-1">
-                      {(item.preco * (item.quantidade || 1)).toLocaleString('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL'
-                      })}
-                      <span className="text-sm text-gray-500 ml-1">
-                        ({item.quantidade}x{' '}
-                        {item.preco.toLocaleString('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL'
-                        })})
-                      </span>
-                    </span>
-                  )}
-                </div>
-                <div className="flex gap-2 items-start ml-4">
-                  <button
-                    className="text-blue-600 hover:text-blue-800 text-sm"
-                    onClick={() => handleEditar(item)}
-                    title="Editar"
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    className="text-red-600 hover:text-red-800 text-sm"
-                    onClick={() => excluirItem(item.id)}
-                    title="Excluir"
-                  >
-                    🗑️
-                  </button>
-                  <input
-                    type="checkbox"
-                    className="w-5 h-5 text-green-600 rounded"
-                    checked={item.comprado}
-                    onChange={() => {
-                      const preco = prompt('Qual o preço pago?');
-                      const supermercado = prompt('Nome do supermercado?');
-                      toggleItem(item.id, preco, supermercado);
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </li>
+            item={item}
+            onEditar={handleEditar}
+            onExcluir={excluirItem}
+            onMarcar={() => {
+              setItemSelecionado(item);
+              setMostrarTeclado(true);
+            }}
+          />
         ))}
       </ul>
 
@@ -143,6 +105,21 @@ export default function Home() {
           currency: 'BRL'
         })}
       </div>
+
+      {mostrarTeclado && itemSelecionado && (
+        <TecladoNumerico
+          onConfirmar={(precoDigitado) => {
+            toggleItem(itemSelecionado.id, precoDigitado.toString(), mercadoAtual || '');
+            setMostrarTeclado(false);
+            setItemSelecionado(null);
+          }}
+          onCancelar={() => {
+            toggleItem(itemSelecionado.id, '0', mercadoAtual || '');
+            setMostrarTeclado(false);
+            setItemSelecionado(null);
+          }}
+        />
+      )}
     </div>
   );
 }
