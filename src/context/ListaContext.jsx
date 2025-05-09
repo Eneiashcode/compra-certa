@@ -8,15 +8,19 @@ import {
   doc,
   onSnapshot
 } from 'firebase/firestore';
+import { useAuth } from './AuthContext';
 
 const ListaContext = createContext();
 
 export function ListaProvider({ children }) {
+  const { usuario, carregando } = useAuth();
   const [itens, setItens] = useState([]);
-  const itensRef = collection(db, 'itens');
 
-  // 🔄 Escuta alterações em tempo real
   useEffect(() => {
+    if (!usuario) return;
+
+    const itensRef = collection(db, 'usuarios', usuario.uid, 'itens');
+
     const unsubscribe = onSnapshot(itensRef, (snapshot) => {
       const dados = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -26,12 +30,14 @@ export function ListaProvider({ children }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [usuario]);
 
-  // ➕ Adiciona item ao Firestore
   const adicionarItem = async ({ nome, marca, quantidade }) => {
+    if (!usuario) return;
+
     try {
-      await addDoc(itensRef, {
+      const ref = collection(db, 'usuarios', usuario.uid, 'itens');
+      await addDoc(ref, {
         nome,
         marca,
         quantidade: parseInt(quantidade) || 1,
@@ -45,12 +51,13 @@ export function ListaProvider({ children }) {
     }
   };
 
-  // ✅ Atualiza como comprado
   const toggleItem = async (id, preco, supermercado) => {
+    if (!usuario) return;
+
     try {
       const precoNumerico = parseFloat(preco.replace(',', '.'));
+      const ref = doc(db, 'usuarios', usuario.uid, 'itens', id);
 
-      const ref = doc(db, 'itens', id);
       await updateDoc(ref, {
         comprado: true,
         preco: precoNumerico,
@@ -62,20 +69,22 @@ export function ListaProvider({ children }) {
     }
   };
 
-  // 🗑️ Excluir item
   const excluirItem = async (id) => {
+    if (!usuario) return;
+
     try {
-      const ref = doc(db, 'itens', id);
+      const ref = doc(db, 'usuarios', usuario.uid, 'itens', id);
       await deleteDoc(ref);
     } catch (error) {
       console.error('Erro ao excluir item:', error);
     }
   };
 
-  // ✏️ Editar item
   const editarItem = async (id, novosDados) => {
+    if (!usuario) return;
+
     try {
-      const ref = doc(db, 'itens', id);
+      const ref = doc(db, 'usuarios', usuario.uid, 'itens', id);
       await updateDoc(ref, novosDados);
     } catch (error) {
       console.error('Erro ao editar item:', error);

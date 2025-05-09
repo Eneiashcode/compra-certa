@@ -1,8 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
+// 🔐 Configuração do Firebase (pode ficar assim, se .env não for usado agora)
+export const firebaseConfig = {
   apiKey: "AIzaSyDd3MblueVpI6860PGvGMpVz-8VyMthY_Y",
   authDomain: "compra-certa-ba543.firebaseapp.com",
   projectId: "compra-certa-ba543",

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLista } from '../context/ListaContext';
+import { logout } from '../firebase/auth';
 
 export default function Header() {
   const [menuAberto, setMenuAberto] = useState(false);
   const { adicionarItem } = useLista();
+  const navigate = useNavigate();
 
   const carregarListaPadrao = () => {
     const confirmar = window.confirm('Deseja carregar a lista padrão de compras?');
@@ -23,6 +25,11 @@ export default function Header() {
 
     itensPadrao.forEach((item) => adicionarItem(item));
     setMenuAberto(false);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
 
   return (
@@ -72,6 +79,12 @@ export default function Header() {
             className="w-full text-left px-4 py-2 text-blue-700 hover:bg-blue-100 border-t border-gray-200"
           >
             🧾 Carregar Lista Padrão Agora
+          </button>
+          <button
+            onClick={handleLogout}
+            className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 border-t border-gray-200"
+          >
+            🚪 Sair
           </button>
         </div>
       )}
