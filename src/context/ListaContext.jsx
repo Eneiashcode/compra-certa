@@ -6,14 +6,17 @@ import {
   updateDoc,
   deleteDoc,
   doc,
-  onSnapshot
+  onSnapshot,
+  getDocs,
+  query,
+  where
 } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
 
 const ListaContext = createContext();
 
 export function ListaProvider({ children }) {
-  const { usuario, carregando } = useAuth();
+  const { usuario } = useAuth();
   const [itens, setItens] = useState([]);
 
   useEffect(() => {
@@ -91,9 +94,46 @@ export function ListaProvider({ children }) {
     }
   };
 
+  const finalizarCompra = async () => {
+    if (!usuario) return;
+
+    try {
+      const itensRef = collection(db, 'usuarios', usuario.uid, 'itens');
+      const snapshot = await getDocs(query(itensRef, where('comprado', '==', true)));
+
+      const itensComprados = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      if (itensComprados.length === 0) return;
+
+      const historicoRef = collection(db, 'usuarios', usuario.uid, 'historico_compras');
+      await addDoc(historicoRef, {
+        data: new Date().toISOString(),
+        itens: itensComprados
+      });
+
+      for (const item of itensComprados) {
+        await deleteDoc(doc(db, 'usuarios', usuario.uid, 'itens', item.id));
+      }
+
+      console.log('✅ Compra finalizada e salva com sucesso!');
+    } catch (err) {
+      console.error('Erro ao finalizar compra:', err);
+    }
+  };
+
   return (
     <ListaContext.Provider
-      value={{ itens, adicionarItem, toggleItem, excluirItem, editarItem }}
+      value={{
+        itens,
+        adicionarItem,
+        toggleItem,
+        excluirItem,
+        editarItem,
+        finalizarCompra, // ✅ exportando
+      }}
     >
       {children}
     </ListaContext.Provider>
