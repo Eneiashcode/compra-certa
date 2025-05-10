@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 export default function RelatorioVariacoes() {
   const { usuario } = useAuth();
   const [variacoes, setVariacoes] = useState({ aumentos: [], quedas: [] });
+  const [expandido, setExpandido] = useState(null);
 
   useEffect(() => {
     const carregarDados = async () => {
@@ -97,55 +98,57 @@ export default function RelatorioVariacoes() {
       year: 'numeric'
     });
 
-  const renderTabela = (titulo, dados) => (
-    <div className="mb-8">
-      <h2 className="text-xl font-bold text-green-700 mb-2">{titulo}</h2>
+  const renderResumo = (titulo, dados, tipo) => (
+    <div className="mb-10">
+      <h2 className="text-xl font-bold text-green-700 mb-4">{titulo}</h2>
       {dados.length === 0 ? (
         <p className="text-gray-500">Nenhuma variação identificada.</p>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-x-auto">
-          <table className="min-w-full table-auto">
-            <thead className="bg-green-100 text-left">
-              <tr>
-                <th className="px-4 py-2">Produto</th>
-                <th className="px-4 py-2">De</th>
-                <th className="px-4 py-2">Para</th>
-                <th className="px-4 py-2">Variação</th>
-                <th className="px-4 py-2">Mercado</th>
-                <th className="px-4 py-2">Última Compra</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dados.map((item, idx) => (
-                <tr key={idx} className="border-t">
-                  <td className="px-4 py-2">{item.produto}</td>
-                  <td className="px-4 py-2">{formatarValor(item.precoAntigo)}</td>
-                  <td className="px-4 py-2">{formatarValor(item.precoAtual)}</td>
-                  <td
-                    className={`px-4 py-2 font-semibold ${
+        <ul className="space-y-2">
+          {dados.map((item, idx) => {
+            const isAberto = expandido === `${tipo}-${idx}`;
+            return (
+              <li
+                key={idx}
+                className="bg-white shadow rounded p-4 cursor-pointer transition hover:bg-green-50"
+                onClick={() =>
+                  setExpandido(isAberto ? null : `${tipo}-${idx}`)
+                }
+              >
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-green-800">{item.produto}</span>
+                  <span
+                    className={`text-sm font-bold ${
                       item.variacao > 0 ? 'text-red-600' : 'text-green-600'
                     }`}
                   >
-                    {item.variacao.toFixed(1)}%
-                  </td>
-                  <td className="px-4 py-2">{item.mercadoAtual || '-'}</td>
-                  <td className="px-4 py-2">{formatarData(item.dataAtual)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    {item.variacao > 0 ? '🔺' : '🔻'} {item.variacao.toFixed(1)}%
+                  </span>
+                  <span className="text-sm text-gray-600">{formatarData(item.dataAtual)}</span>
+                </div>
+
+                {isAberto && (
+                  <div className="mt-3 text-sm text-gray-700 space-y-1">
+                    <div>De: {formatarValor(item.precoAntigo)}</div>
+                    <div>Para: {formatarValor(item.precoAtual)}</div>
+                    <div>Mercado: {item.mercadoAtual || '-'}</div>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
       )}
     </div>
   );
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-3xl font-bold text-center text-green-800 mb-8">
         📊 Relatório de Variações de Preço
       </h1>
-      {renderTabela('🔺 Top 10 Maiores Aumentos', variacoes.aumentos)}
-      {renderTabela('🔻 Top 10 Maiores Quedas', variacoes.quedas)}
+      {renderResumo('🔺 Top 10 Maiores Aumentos', variacoes.aumentos, 'aumento')}
+      {renderResumo('🔻 Top 10 Maiores Quedas', variacoes.quedas, 'queda')}
     </div>
   );
 }
