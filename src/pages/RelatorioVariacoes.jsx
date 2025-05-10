@@ -1,26 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase/config';
 import { collection, getDocs } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext';
 
 export default function RelatorioVariacoes() {
+  const { usuario } = useAuth();
   const [variacoes, setVariacoes] = useState({ aumentos: [], quedas: [] });
 
   useEffect(() => {
     const carregarDados = async () => {
-      const snapshot = await getDocs(collection(db, 'itens'));
-      const comprados = snapshot.docs
-        .map(doc => doc.data())
-        .filter(item => item.comprado && item.preco > 0 && item.dataCompra);
+      if (!usuario) return;
+
+      const ref = collection(db, 'usuarios', usuario.uid, 'historico_compras');
+      const snapshot = await getDocs(ref);
+
+      const todosItens = [];
+
+      snapshot.docs.forEach((doc) => {
+        const dataCompra = doc.data().data;
+        const itens = doc.data().itens || [];
+
+        itens.forEach((item) => {
+          if (item.comprado && item.preco > 0) {
+            todosItens.push({
+              nome: item.nome,
+              marca: item.marca,
+              preco: item.preco,
+              dataCompra: new Date(dataCompra),
+              supermercado: item.supermercado || ''
+            });
+          }
+        });
+      });
 
       const agrupados = {};
 
-      comprados.forEach((item) => {
+      todosItens.forEach((item) => {
         const chave = `${item.nome} - ${item.marca}`;
         if (!agrupados[chave]) agrupados[chave] = [];
         agrupados[chave].push({
           preco: item.preco,
-          data: new Date(item.dataCompra),
-          mercado: item.supermercado || ''
+          data: item.dataCompra,
+          mercado: item.supermercado
         });
       });
 
@@ -61,7 +82,7 @@ export default function RelatorioVariacoes() {
     };
 
     carregarDados();
-  }, []);
+  }, [usuario]);
 
   const formatarValor = (valor) =>
     valor.toLocaleString('pt-BR', {
