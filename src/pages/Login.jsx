@@ -41,6 +41,16 @@ export default function Login() {
           Entrar
         </button>
       </form>
+
+      <div className="text-sm text-center mt-3">
+        <span
+          className="text-blue-600 cursor-pointer underline"
+          onClick={() => navigate('/recuperar-senha')}
+        >
+          Esqueceu sua senha?
+        </span>
+      </div>
+
       <p className="text-sm text-center mt-4">
         Ainda não tem conta?{' '}
         <span

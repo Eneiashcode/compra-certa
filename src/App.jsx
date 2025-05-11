@@ -6,11 +6,12 @@ import MinhaListaPadrao from './pages/MinhaListaPadrao';
 import RelatorioVariacoes from './pages/RelatorioVariacoes';
 import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
+import TelaInicial from './pages/TelaInicial';
+import RecuperarSenha from './pages/RecuperarSenha'; // ✅ Novo
 import Header from './components/Header';
 import { ListaProvider } from './context/ListaContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-// 🔐 Componente para proteger rotas privadas
 function RotaPrivada({ children }) {
   const { usuario, carregando } = useAuth();
 
@@ -28,8 +29,11 @@ export default function App() {
         <div className="min-h-screen bg-gradient-to-br from-green-100 to-green-200 p-4">
           <Header />
           <Routes>
+            <Route path="/" element={<Navigate to="/inicio" />} />
+            <Route path="/inicio" element={<TelaInicial />} />
+
             <Route
-              path="/"
+              path="/home"
               element={
                 <RotaPrivada>
                   <Home />
@@ -60,8 +64,10 @@ export default function App() {
                 </RotaPrivada>
               }
             />
+
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Cadastro />} />
+            <Route path="/recuperar-senha" element={<RecuperarSenha />} /> {/* ✅ Nova rota */}
           </Routes>
         </div>
       </ListaProvider>
