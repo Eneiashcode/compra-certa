@@ -38,7 +38,7 @@ export default function Home() {
 
   const itensPendentes = itens
     .filter((item) => !item.comprado)
-    .sort((a, b) => a.nome.localeCompare(b.nome)); // ✅ ordenando por nome
+    .sort((a, b) => a.nome.localeCompare(b.nome));
 
   const total = itens.reduce((sum, item) => {
     if (item.preco && item.quantidade) {
@@ -49,6 +49,10 @@ export default function Home() {
 
   return (
     <div className="max-w-2xl mx-auto bg-white shadow-xl rounded-xl p-6">
+      <div className="bg-yellow-100 text-yellow-800 border border-yellow-300 p-4 rounded mb-6 text-center">
+        🚧 Este app está em fase de testes e melhorias contínuas. Sua experiência pode evoluir a qualquer momento!
+      </div>
+
       <h1 className="text-3xl font-extrabold text-green-700 mb-6 text-center">
         🛒 Minha Lista
       </h1>

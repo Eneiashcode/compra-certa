@@ -85,6 +85,13 @@ export default function Header() {
           >
             📊 Relatório de Variações
           </Link>
+          <a
+            href="mailto:edias.dias@terra.com.br?subject=Dúvida ou Sugestão - Compra Certa"
+            className="block px-4 py-2 text-green-700 hover:bg-green-100 border-t border-gray-200"
+            onClick={() => setMenuAberto(false)}
+          >
+            📩 Suporte
+          </a>
           <button
             onClick={carregarListaPadraoDoUsuario}
             className="w-full text-left px-4 py-2 text-green-700 hover:bg-green-100 border-t border-gray-200"
