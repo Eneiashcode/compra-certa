@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useLista } from '../context/ListaContext';
 import SelecionarMercado from '../components/SelecionarMercado';
-import ItemCompra from '../components/ItemCompra';
 import TecladoNumerico from '../components/TecladoNumerico';
 
 export default function Home() {
@@ -37,7 +36,9 @@ export default function Home() {
     });
   };
 
-  const itensPendentes = itens.filter((item) => !item.comprado);
+  const itensPendentes = itens
+    .filter((item) => !item.comprado)
+    .sort((a, b) => a.nome.localeCompare(b.nome)); // ✅ ordenando por nome
 
   const total = itens.reduce((sum, item) => {
     if (item.preco && item.quantidade) {
@@ -85,16 +86,42 @@ export default function Home() {
 
       <ul className="space-y-3">
         {itensPendentes.map((item) => (
-          <ItemCompra
-            key={item.id}
-            item={item}
-            onEditar={handleEditar}
-            onExcluir={excluirItem}
-            onMarcar={() => {
-              setItemSelecionado(item);
-              setMostrarTeclado(true);
-            }}
-          />
+          <li key={item.id} className="flex justify-between items-center p-4 rounded-lg shadow-md bg-gray-50">
+            <div className="flex items-center">
+              <span className="text-xl font-bold text-green-700 mr-3">
+                {item.quantidade}x
+              </span>
+              <div>
+                <strong className="text-lg">{item.nome}</strong>{' '}
+                <span className="text-sm text-gray-500">({item.marca})</span>
+              </div>
+            </div>
+            <div className="flex gap-2 items-center">
+              <button
+                className="text-blue-600 hover:text-blue-800 text-sm"
+                onClick={() => handleEditar(item)}
+                title="Editar"
+              >
+                ✏️
+              </button>
+              <button
+                className="text-red-600 hover:text-red-800 text-sm"
+                onClick={() => excluirItem(item.id)}
+                title="Excluir"
+              >
+                🗑️
+              </button>
+              <input
+                type="checkbox"
+                className="w-5 h-5 text-green-600 rounded"
+                checked={item.comprado}
+                onChange={() => {
+                  setItemSelecionado(item);
+                  setMostrarTeclado(true);
+                }}
+              />
+            </div>
+          </li>
         ))}
       </ul>
 

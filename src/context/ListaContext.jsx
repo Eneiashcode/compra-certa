@@ -72,6 +72,22 @@ export function ListaProvider({ children }) {
     }
   };
 
+  const devolverItem = async (id) => {
+    if (!usuario) return;
+
+    try {
+      const ref = doc(db, 'usuarios', usuario.uid, 'itens', id);
+      await updateDoc(ref, {
+        comprado: false,
+        preco: 0,
+        supermercado: '',
+        dataCompra: null
+      });
+    } catch (error) {
+      console.error('Erro ao devolver item para a lista:', error);
+    }
+  };
+
   const excluirItem = async (id) => {
     if (!usuario) return;
 
@@ -132,7 +148,8 @@ export function ListaProvider({ children }) {
         toggleItem,
         excluirItem,
         editarItem,
-        finalizarCompra, // ✅ exportando
+        finalizarCompra,
+        devolverItem // ✅ incluído no contexto
       }}
     >
       {children}

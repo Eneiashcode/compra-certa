@@ -1,34 +1,45 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLista } from '../context/ListaContext';
+import { db } from '../firebase/config';
+import { getDocs, collection } from 'firebase/firestore';
 import { logout } from '../firebase/auth';
+import { useAuth } from '../context/AuthContext';
 
 export default function Header() {
   const [menuAberto, setMenuAberto] = useState(false);
   const { adicionarItem } = useLista();
+  const { usuario } = useAuth();
   const navigate = useNavigate();
 
-  const carregarListaPadrao = () => {
-    const confirmar = window.confirm('Deseja carregar a lista padrão de compras?');
-    if (!confirmar) return;
+  const carregarListaPadraoDoUsuario = async () => {
+    if (!usuario) return;
 
-    const itensPadrao = [
-      { nome: 'Arroz', marca: 'Tio João', quantidade: 2 },
-      { nome: 'Feijão', marca: 'Kicaldo', quantidade: 2 },
-      { nome: 'Óleo de Soja', marca: 'Soya', quantidade: 1 },
-      { nome: 'Papel Higiênico', marca: 'Personal', quantidade: 1 },
-      { nome: 'Detergente', marca: 'Ypê', quantidade: 2 },
-      { nome: 'Sabão em Pó', marca: 'Omo', quantidade: 1 },
-      { nome: 'Café', marca: 'Pilão', quantidade: 1 },
-      { nome: 'Macarrão', marca: 'Renata', quantidade: 2 }
-    ];
+    const refPadrao = collection(db, 'usuarios', usuario.uid, 'lista_padrao');
+    const snapshot = await getDocs(refPadrao);
 
-    itensPadrao.forEach((item) => adicionarItem(item));
+    if (snapshot.empty) {
+      alert('Sua lista padrão está vazia!');
+      setMenuAberto(false);
+      return;
+    }
+
+    snapshot.docs.forEach((doc) => {
+      const item = doc.data();
+      adicionarItem({
+        nome: item.nome,
+        marca: item.marca,
+        quantidade: item.quantidade
+      });
+    });
+
+    alert('Lista Padrão carregada na sua lista de compras!');
     setMenuAberto(false);
   };
 
   const handleLogout = async () => {
     await logout();
+    setMenuAberto(false);
     navigate('/login');
   };
 
@@ -47,7 +58,7 @@ export default function Header() {
       {menuAberto && (
         <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-10">
           <Link
-            to="/"
+            to="/home"
             className="block px-4 py-2 text-green-700 hover:bg-green-100"
             onClick={() => setMenuAberto(false)}
           >
@@ -62,27 +73,27 @@ export default function Header() {
           </Link>
           <Link
             to="/minha-lista-padrao"
-            className="block px-4 py-2 text-blue-700 hover:bg-blue-100"
+            className="block px-4 py-2 text-green-700 hover:bg-green-100"
             onClick={() => setMenuAberto(false)}
           >
             ⚙️ Gerenciar Lista Padrão
           </Link>
           <Link
             to="/relatorio-variacoes"
-            className="block px-4 py-2 text-purple-700 hover:bg-purple-100"
+            className="block px-4 py-2 text-green-700 hover:bg-green-100"
             onClick={() => setMenuAberto(false)}
           >
             📊 Relatório de Variações
           </Link>
           <button
-            onClick={carregarListaPadrao}
-            className="w-full text-left px-4 py-2 text-blue-700 hover:bg-blue-100 border-t border-gray-200"
+            onClick={carregarListaPadraoDoUsuario}
+            className="w-full text-left px-4 py-2 text-green-700 hover:bg-green-100 border-t border-gray-200"
           >
             🧾 Carregar Lista Padrão Agora
           </button>
           <button
             onClick={handleLogout}
-            className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 border-t border-gray-200"
+            className="w-full text-left px-4 py-2 text-green-700 hover:bg-green-100 border-t border-gray-200"
           >
             🚪 Sair
           </button>

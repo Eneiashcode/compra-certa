@@ -8,15 +8,17 @@ import {
   doc
 } from 'firebase/firestore';
 import { useLista } from '../context/ListaContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function MinhaListaPadrao() {
+  const { usuario } = useAuth();
   const [itensPadrao, setItensPadrao] = useState([]);
   const [nome, setNome] = useState('');
   const [marca, setMarca] = useState('');
   const [quantidade, setQuantidade] = useState(1);
   const { adicionarItem } = useLista();
 
-  const refPadrao = collection(db, 'listaPadrao');
+  const refPadrao = collection(db, 'usuarios', usuario.uid, 'lista_padrao');
 
   // 🔄 Carrega os itens da lista padrão ao abrir a tela
   const carregarListaPadrao = async () => {
@@ -29,8 +31,10 @@ export default function MinhaListaPadrao() {
   };
 
   useEffect(() => {
-    carregarListaPadrao();
-  }, []);
+    if (usuario) {
+      carregarListaPadrao();
+    }
+  }, [usuario]);
 
   const handleAdicionar = async () => {
     if (!nome.trim()) return;
@@ -46,7 +50,7 @@ export default function MinhaListaPadrao() {
   };
 
   const handleExcluir = async (id) => {
-    await deleteDoc(doc(db, 'listaPadrao', id));
+    await deleteDoc(doc(db, 'usuarios', usuario.uid, 'lista_padrao', id));
     carregarListaPadrao();
   };
 
@@ -66,7 +70,7 @@ export default function MinhaListaPadrao() {
   return (
     <div className="max-w-2xl mx-auto bg-white shadow-xl rounded-xl p-6">
       <h2 className="text-2xl font-bold text-green-700 mb-4 text-center">
-        🧾 Minha Lista Padrão
+        🧾 Gerenciar Lista Padrão
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -105,7 +109,8 @@ export default function MinhaListaPadrao() {
           {itensPadrao.map((item) => (
             <li key={item.id} className="p-3 bg-gray-100 rounded flex justify-between items-center">
               <div>
-                <strong>{item.nome}</strong> <span className="text-sm text-gray-500">({item.marca})</span>{' '}
+                <strong>{item.nome}</strong>{' '}
+                <span className="text-sm text-gray-500">({item.marca})</span>{' '}
                 - Qtd: {item.quantidade}
               </div>
               <button
@@ -118,6 +123,10 @@ export default function MinhaListaPadrao() {
           ))}
         </ul>
       )}
+
+      <div className="text-right text-xs text-gray-500 mb-2">
+        Os itens adicionados aqui serão salvos automaticamente como sua Lista Padrão.
+      </div>
 
       <div className="text-right">
         <button

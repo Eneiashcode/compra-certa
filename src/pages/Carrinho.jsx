@@ -2,7 +2,7 @@ import React from 'react';
 import { useLista } from '../context/ListaContext';
 
 export default function Carrinho() {
-  const { itens, excluirItem, editarItem, finalizarCompra } = useLista();
+  const { itens, excluirItem, editarItem, finalizarCompra, devolverItem } = useLista();
   const itensCarrinho = itens.filter((item) => item.comprado);
 
   const totalCarrinho = itensCarrinho.reduce(
@@ -47,7 +47,7 @@ export default function Carrinho() {
 
   return (
     <div className="max-w-2xl mx-auto bg-white shadow-xl rounded-xl p-6">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-2">
         <h2 className="text-2xl font-bold text-green-800">🛒 Itens no Carrinho</h2>
         {itensCarrinho.length > 0 && (
           <button
@@ -59,6 +59,12 @@ export default function Carrinho() {
         )}
       </div>
 
+      <div className="text-sm text-gray-500 mb-4 flex gap-4 items-center">
+        <span>✏️ Editar</span>
+        <span>↩️ Devolver</span>
+        <span>🗑️ Excluir</span>
+      </div>
+
       {itensCarrinho.length === 0 ? (
         <p className="text-gray-500">Nenhum item marcado ainda.</p>
       ) : (
@@ -67,10 +73,12 @@ export default function Carrinho() {
             <li key={item.id} className="p-4 rounded-lg shadow-sm bg-green-100">
               <div className="flex justify-between items-start">
                 <div>
-                  <strong className="text-lg">{item.nome}</strong>{' '}
-                  <span className="text-sm text-gray-600">({item.marca})</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold text-green-700">{item.quantidade}x</span>
+                    <strong className="text-lg">{item.nome}</strong>
+                    <span className="text-sm text-gray-600">({item.marca})</span>
+                  </div>
                   <div className="text-sm text-gray-700 mt-1">
-                    {item.quantidade}x{' '}
                     {item.preco?.toLocaleString('pt-BR', {
                       style: 'currency',
                       currency: 'BRL'
@@ -91,14 +99,21 @@ export default function Carrinho() {
                 </div>
                 <div className="flex gap-3 ml-4">
                   <button
-                    className="text-blue-600 hover:text-blue-800 text-sm"
+                    className="text-blue-600 hover:text-blue-800 text-lg"
                     onClick={() => handleEditar(item)}
                     title="Editar"
                   >
                     ✏️
                   </button>
                   <button
-                    className="text-red-600 hover:text-red-800 text-sm"
+                    className="text-yellow-600 hover:text-yellow-800 text-lg"
+                    onClick={() => devolverItem(item.id)}
+                    title="Devolver para Lista"
+                  >
+                    ↩️
+                  </button>
+                  <button
+                    className="text-red-600 hover:text-red-800 text-lg"
                     onClick={() => excluirItem(item.id)}
                     title="Excluir"
                   >
