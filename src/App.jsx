@@ -7,7 +7,8 @@ import RelatorioVariacoes from './pages/RelatorioVariacoes';
 import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
 import TelaInicial from './pages/TelaInicial';
-import RecuperarSenha from './pages/RecuperarSenha'; // ✅ Novo
+import RecuperarSenha from './pages/RecuperarSenha';
+import Tutorial from './pages/Tutorial'; // ✅ Importado corretamente
 import Header from './components/Header';
 import { ListaProvider } from './context/ListaContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -65,9 +66,10 @@ export default function App() {
               }
             />
 
+            <Route path="/tutorial" element={<Tutorial />} /> {/* ✅ Agora incluído */}
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Cadastro />} />
-            <Route path="/recuperar-senha" element={<RecuperarSenha />} /> {/* ✅ Nova rota */}
+            <Route path="/recuperar-senha" element={<RecuperarSenha />} />
           </Routes>
         </div>
       </ListaProvider>

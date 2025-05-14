@@ -29,7 +29,8 @@ export default function Header() {
       adicionarItem({
         nome: item.nome,
         marca: item.marca,
-        quantidade: item.quantidade
+        quantidade: item.quantidade,
+        unidade: item.unidade || 'un',
       });
     });
 
@@ -84,6 +85,13 @@ export default function Header() {
             onClick={() => setMenuAberto(false)}
           >
             📊 Relatório de Variações
+          </Link>
+          <Link
+            to="/tutorial"
+            className="block px-4 py-2 text-green-700 hover:bg-green-100 border-t border-gray-200"
+            onClick={() => setMenuAberto(false)}
+          >
+            📖 Tutorial
           </Link>
           <a
             href="mailto:edias.dias@terra.com.br?subject=Dúvida ou Sugestão - Compra Certa"

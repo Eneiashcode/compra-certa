@@ -3,7 +3,10 @@ import { useLista } from '../context/ListaContext';
 
 export default function Carrinho() {
   const { itens, excluirItem, editarItem, finalizarCompra, devolverItem } = useLista();
-  const itensCarrinho = itens.filter((item) => item.comprado);
+
+  const itensCarrinho = itens
+    .filter((item) => item.comprado)
+    .sort((a, b) => a.nome.localeCompare(b.nome)); // ✅ Agora ordenado por nome
 
   const totalCarrinho = itensCarrinho.reduce(
     (sum, item) => sum + (item.preco || 0) * (item.quantidade || 1),
@@ -33,9 +36,12 @@ export default function Carrinho() {
     const qtdConvertida = parseInt(novaQtd);
     if (isNaN(qtdConvertida)) return;
 
+    const novaUnidade = prompt('Nova unidade (ex: un, kg, l, ml, pct):', item.unidade || 'un');
+
     editarItem(item.id, {
       preco: precoConvertido,
-      quantidade: qtdConvertida
+      quantidade: qtdConvertida,
+      unidade: novaUnidade || 'un',
     });
   };
 
@@ -74,7 +80,9 @@ export default function Carrinho() {
               <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-green-700">{item.quantidade}x</span>
+                    <span className="text-lg font-bold text-green-700">
+                      {item.quantidade} {item.unidade || 'un'}
+                    </span>
                     <strong className="text-lg">{item.nome}</strong>
                     <span className="text-sm text-gray-600">({item.marca})</span>
                   </div>

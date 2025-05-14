@@ -9,24 +9,23 @@ import {
 } from 'firebase/firestore';
 import { useLista } from '../context/ListaContext';
 import { useAuth } from '../context/AuthContext';
+import FormularioAdicionarItem from '../components/FormularioAdicionarItem';
 
 export default function MinhaListaPadrao() {
   const { usuario } = useAuth();
-  const [itensPadrao, setItensPadrao] = useState([]);
-  const [nome, setNome] = useState('');
-  const [marca, setMarca] = useState('');
-  const [quantidade, setQuantidade] = useState(1);
   const { adicionarItem } = useLista();
+  const [itensPadrao, setItensPadrao] = useState([]);
 
   const refPadrao = collection(db, 'usuarios', usuario.uid, 'lista_padrao');
 
-  // 🔄 Carrega os itens da lista padrão ao abrir a tela
   const carregarListaPadrao = async () => {
     const snapshot = await getDocs(refPadrao);
-    const dados = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const dados = snapshot.docs
+      .map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      .sort((a, b) => a.nome.localeCompare(b.nome)); // ✅ Agora ordena por nome ao carregar
     setItensPadrao(dados);
   };
 
@@ -36,16 +35,14 @@ export default function MinhaListaPadrao() {
     }
   }, [usuario]);
 
-  const handleAdicionar = async () => {
-    if (!nome.trim()) return;
+  const handleAdicionar = async (item) => {
+    if (!item.nome.trim()) return;
     await addDoc(refPadrao, {
-      nome,
-      marca,
-      quantidade: parseInt(quantidade) || 1
+      nome: item.nome,
+      marca: item.marca,
+      quantidade: parseFloat(item.quantidade) || 1,
+      unidade: item.unidade || 'un',
     });
-    setNome('');
-    setMarca('');
-    setQuantidade(1);
     carregarListaPadrao();
   };
 
@@ -55,12 +52,13 @@ export default function MinhaListaPadrao() {
   };
 
   const copiarParaCompraAtual = () => {
-    if (confirm('Deseja carregar esses itens para sua lista de compras atual?')) {
+    if (window.confirm('Deseja carregar esses itens para sua lista de compras atual?')) {
       itensPadrao.forEach((item) => {
         adicionarItem({
           nome: item.nome,
           marca: item.marca,
-          quantidade: item.quantidade
+          quantidade: item.quantidade,
+          unidade: item.unidade || 'un',
         });
       });
       alert('Itens adicionados à sua lista de compras!');
@@ -73,49 +71,25 @@ export default function MinhaListaPadrao() {
         🧾 Gerenciar Lista Padrão
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <input
-          placeholder="Produto"
-          className="col-span-1 border p-2 rounded"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-        />
-        <input
-          placeholder="Marca"
-          className="col-span-1 border p-2 rounded"
-          value={marca}
-          onChange={(e) => setMarca(e.target.value)}
-        />
-        <input
-          type="number"
-          min={1}
-          placeholder="Qtd"
-          className="col-span-1 border p-2 rounded"
-          value={quantidade}
-          onChange={(e) => setQuantidade(Number(e.target.value))}
-        />
-        <button
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          onClick={handleAdicionar}
-        >
-          ➕ Adicionar
-        </button>
-      </div>
+      <FormularioAdicionarItem
+        onAdicionar={handleAdicionar}
+      />
 
       {itensPadrao.length === 0 ? (
         <p className="text-gray-500">Sua lista padrão está vazia.</p>
       ) : (
         <ul className="space-y-3 mb-4">
           {itensPadrao.map((item) => (
-            <li key={item.id} className="p-3 bg-gray-100 rounded flex justify-between items-center">
+            <li key={item.id} className="p-3 bg-gray-50 rounded flex justify-between items-center shadow-sm">
               <div>
                 <strong>{item.nome}</strong>{' '}
                 <span className="text-sm text-gray-500">({item.marca})</span>{' '}
-                - Qtd: {item.quantidade}
+                - Qtd: {item.quantidade} {item.unidade || 'un'}
               </div>
               <button
                 onClick={() => handleExcluir(item.id)}
                 className="text-red-600 hover:text-red-800 text-sm"
+                title="Excluir da lista padrão"
               >
                 🗑️
               </button>

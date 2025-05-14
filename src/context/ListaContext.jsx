@@ -35,7 +35,7 @@ export function ListaProvider({ children }) {
     return () => unsubscribe();
   }, [usuario]);
 
-  const adicionarItem = async ({ nome, marca, quantidade }) => {
+  const adicionarItem = async ({ nome, marca, quantidade, unidade }) => {
     if (!usuario) return;
 
     try {
@@ -44,6 +44,7 @@ export function ListaProvider({ children }) {
         nome,
         marca,
         quantidade: parseInt(quantidade) || 1,
+        unidade: unidade || 'un', // ✅ Agora grava corretamente a unidade
         comprado: false,
         preco: 0,
         supermercado: '',
@@ -149,7 +150,7 @@ export function ListaProvider({ children }) {
         excluirItem,
         editarItem,
         finalizarCompra,
-        devolverItem // ✅ incluído no contexto
+        devolverItem
       }}
     >
       {children}

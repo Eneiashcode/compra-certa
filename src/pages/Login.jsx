@@ -60,6 +60,11 @@ export default function Login() {
           Cadastre-se
         </span>
       </p>
+
+      {/* ✅ Versão do sistema no rodapé */}
+      <div className="text-center text-gray-400 text-xs mt-8">
+        Versão 0.2
+      </div>
     </div>
   );
 }
