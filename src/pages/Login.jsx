@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../firebase/auth';
+import { addDoc, collection } from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { getAuth } from 'firebase/auth';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,8 +15,26 @@ export default function Login() {
     e.preventDefault();
     try {
       await login(email, senha);
-      navigate('/');
+
+      // Aguarda o Firebase carregar o usuário atual antes de continuar
+      const auth = getAuth();
+      const unsubscribe = auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          // ✅ Salvar data/hora do login para controle de sessão
+          localStorage.setItem('dataHoraLogin', new Date().toISOString());
+
+          // ✅ Logar o acesso no Firestore
+          await addDoc(collection(db, 'logs_acessos'), {
+            usuario: user.email,
+            dataAcesso: new Date().toISOString(),
+          });
+
+          unsubscribe(); // para evitar chamadas múltiplas
+          navigate('/');
+        }
+      });
     } catch (err) {
+      console.error('Erro no login:', err);
       setErro('Credenciais inválidas. Tente novamente.');
     }
   };
@@ -61,7 +82,6 @@ export default function Login() {
         </span>
       </p>
 
-      {/* ✅ Versão do sistema no rodapé */}
       <div className="text-center text-gray-400 text-xs mt-8">
         Versão 0.2
       </div>
