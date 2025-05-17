@@ -9,6 +9,7 @@ import Cadastro from './pages/Cadastro';
 import TelaInicial from './pages/TelaInicial';
 import RecuperarSenha from './pages/RecuperarSenha';
 import Tutorial from './pages/Tutorial'; // ✅ Importado corretamente
+import Perfil from './pages/Perfil'; // ✅ Novo
 import Header from './components/Header';
 import { ListaProvider } from './context/ListaContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -65,8 +66,15 @@ export default function App() {
                 </RotaPrivada>
               }
             />
-
-            <Route path="/tutorial" element={<Tutorial />} /> {/* ✅ Agora incluído */}
+            <Route
+              path="/perfil"
+              element={
+                <RotaPrivada>
+                  <Perfil />
+                </RotaPrivada>
+              }
+            />
+            <Route path="/tutorial" element={<Tutorial />} />
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/recuperar-senha" element={<RecuperarSenha />} />

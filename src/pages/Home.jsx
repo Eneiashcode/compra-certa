@@ -1,16 +1,36 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLista } from '../context/ListaContext';
 import SelecionarMercado from '../components/SelecionarMercado';
 import TecladoNumerico from '../components/TecladoNumerico';
 import FormularioAdicionarItem from '../components/FormularioAdicionarItem';
+import AlertaListaCompartilhada from '../components/AlertaListaCompartilhada';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase/config';
 
 export default function Home() {
   const { itens, toggleItem, adicionarItem, excluirItem, editarItem } = useLista();
+  const { usuario } = useAuth();
   const [itemSelecionado, setItemSelecionado] = useState(null);
   const [mercadoAtual, setMercadoAtual] = useState('');
   const [mostrarTeclado, setMostrarTeclado] = useState(false);
+  const [nomeUsuario, setNomeUsuario] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const buscarNome = async () => {
+      if (usuario) {
+        const ref = doc(db, 'usuarios', usuario.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          const dados = snap.data();
+          setNomeUsuario(dados.nome || '');
+        }
+      }
+    };
+    buscarNome();
+  }, [usuario]);
 
   const itensPendentes = itens
     .filter((item) => !item.comprado)
@@ -51,6 +71,15 @@ export default function Home() {
         🛒 Minha Lista
       </h1>
 
+      {/* ✅ Saudação personalizada */}
+      <div className="text-center text-sm text-gray-600 mb-2">
+        Olá,{' '}
+        <span className="font-semibold">
+          {nomeUsuario || usuario?.email}
+        </span>{' '}
+        👋
+      </div>
+
       {/* ✅ Dica para o usuário acessar o tutorial */}
       <div className="text-sm text-gray-500 text-center mb-4">
         ℹ️ Dica: Veja como usar o app em{' '}
@@ -72,6 +101,8 @@ export default function Home() {
           });
         }}
       />
+
+      <AlertaListaCompartilhada />
 
       <ul className="space-y-3 mt-6">
         {itensPendentes.map((item) => (

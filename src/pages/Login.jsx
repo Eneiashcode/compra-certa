@@ -83,7 +83,7 @@ export default function Login() {
       </p>
 
       <div className="text-center text-gray-400 text-xs mt-8">
-        Versão 0.2
+        Versão 0.2.1
       </div>
     </div>
   );

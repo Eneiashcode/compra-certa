@@ -93,6 +93,13 @@ export default function Header() {
           >
             📖 Tutorial
           </Link>
+          <Link
+            to="/perfil"
+            className="block px-4 py-2 text-green-700 hover:bg-green-100 border-t border-gray-200"
+            onClick={() => setMenuAberto(false)}
+          >
+            👤 Perfil
+          </Link>
           <a
             href="mailto:edias.dias@terra.com.br?subject=Dúvida ou Sugestão - Compra Certa"
             className="block px-4 py-2 text-green-700 hover:bg-green-100 border-t border-gray-200"
